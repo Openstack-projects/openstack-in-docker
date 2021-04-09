@@ -1,5 +1,6 @@
 ---
 # Copyright (c) 2015 Davide Guerri <davide.guerri@gmail.com>
+# Copyright (c) 2020 Pratik Raj <rajpratik71@gmail.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +32,7 @@
   tasks:
 
     - name: Start Auto-DNS container
-      docker:
+      docker_container:
         image: rehabstudio/autodns
         name: "{{ AUTODNS_HOSTNAME }}"
         hostname: "{{ AUTODNS_HOSTNAME }}"
@@ -45,7 +46,7 @@
       when: autodns_status|changed
 
     - name: Start Memcached container
-      docker:
+      docker_container:
         image: os-memcached
         name: "{{ MEMCACHED_HOSTNAME }}"
         hostname: "{{ MEMCACHED_HOSTNAME }}"
@@ -59,7 +60,7 @@
         state: started
 
     - name: Creating MySQL data container
-      docker:
+      docker_container:
         name: "{{ MYSQL_DATA_CONTAINER_NAME }}"
         image: os-base-image
         state: present
@@ -68,7 +69,7 @@
           - /var/lib/mysql
 
     - name: Start MySQL container
-      docker:
+      docker_container:
         image: os-mysql
         name: "{{ MYSQL_HOSTNAME }}"
         hostname: "{{ MYSQL_HOSTNAME }}"
@@ -129,7 +130,7 @@
           db: nova
 
     - name: Start Keystone container
-      docker:
+      docker_container:
         image: os-keystone
         name: "{{ KEYSTONE_HOSTNAME }}"
         hostname: "{{ KEYSTONE_HOSTNAME }}"
@@ -155,7 +156,7 @@
         - 5000
 
     - name: Create Keystone admin tenant
-      keystone_user:
+      os_user:
         tenant: admin
         tenant_description:  "Admin tenant"
         endpoint: "http://{{ KEYSTONE_HOSTNAME }}:35357/v2.0"
@@ -163,7 +164,7 @@
         state: "present"
 
     - name: Create Keystone service tenant
-      keystone_user:
+      os_user:
         tenant: "{{ SERVICE_TENANT_NAME }}"
         tenant_description: "Service tenant"
         endpoint: "http://{{ KEYSTONE_HOSTNAME }}:35357/v2.0"
@@ -176,7 +177,7 @@
         service_tenant_id: "{{ service_tenant_status.id }}"
 
     - name: Create Keystone users
-      keystone_user:
+      os_user:
         user: "{{ item.name }}"
         password: "{{ item.password }}"
         tenant: "{{ item.tenant }}"
@@ -205,7 +206,7 @@
           tenant: "{{ SERVICE_TENANT_NAME }}"
 
     - name: Add Keystone roles to defined users in defined tenants
-      keystone_user:
+      os_user:
         role: "{{ item.name }}"
         user: "{{ item.user }}"
         tenant: "{{ item.tenant }}"
@@ -285,7 +286,7 @@
           admin_url: "http://{{ IRONIC_API_HOSTNAME }}:6385/"
 
     - name: Start RabbitMQ container
-      docker:
+      docker_container:
         image: os-rabbitmq
         name: "{{ RABBITMQ_HOSTNAME }}"
         hostname: "{{ RABBITMQ_HOSTNAME }}"
@@ -324,7 +325,7 @@
       when: rabbitmq_status|changed
 
     - name: Creating PXE/iPXE data container
-      docker:
+      docker_container:
         name: "{{ PXE_BOOT_DATA_CONTAINER_NAME }}"
         image: os-base-image
         state: present
@@ -333,7 +334,7 @@
           - /pxe
 
     - name: Start TFTPd Server container
-      docker:
+      docker_container:
         image: os-tftpboot
         name: "{{ PXE_TFTPD_HOSTNAME }}"
         hostname: "{{ PXE_TFTPD_HOSTNAME }}"
@@ -344,7 +345,7 @@
           - "{{ PXE_BOOT_DATA_CONTAINER_NAME }}"
 
     - name: Start Apache server (iPXE) container
-      docker:
+      docker_container:
         image: os-httpboot
         name: "{{ IPXE_HTTPD_HOSTNAME }}"
         hostname: "{{ IPXE_HTTPD_HOSTNAME }}"
@@ -361,7 +362,7 @@
         state: started
 
     - name: Start Ironic Conductor container
-      docker:
+      docker_container:
         image: os-ironic-conductor
         name: "{{ IRONIC_CONDUCTOR_HOSTNAME }}"
         hostname: "{{ IRONIC_CONDUCTOR_HOSTNAME }}"
@@ -394,7 +395,7 @@
           IRONIC_NOTIFICATIONS: "{{ ENABLE_IRONIC_NOTIFICATIONS }}"
 
     - name: Start Ironic API container
-      docker:
+      docker_container:
         image: os-ironic-api
         name: "{{ IRONIC_API_HOSTNAME }}"
         hostname: "{{ IRONIC_API_HOSTNAME }}"
@@ -429,7 +430,7 @@
         state: started
 
     - name: Start Neutron Server container
-      docker:
+      docker_container:
         image: os-neutron-server
         name: "{{ NEUTRON_SERVER_HOSTNAME }}"
         hostname: "{{ NEUTRON_SERVER_HOSTNAME }}"
@@ -462,7 +463,7 @@
         state: started
 
     - name: Start Neutron DHCP agent container
-      docker:
+      docker_container:
         image: os-neutron-dhcp-agent
         name: "{{ NEUTRON_DHCP_AGENT_HOSTNAME }}"
         hostname: "{{ NEUTRON_DHCP_AGENT_HOSTNAME }}"
@@ -483,7 +484,7 @@
           NEUTRON_ENABLE_IPXE: "true"
 
     - name: Start Nova Conductor container
-      docker:
+      docker_container:
         image: os-nova-conductor
         name: "{{ NOVA_CONDUCTOR_HOSTNAME }}"
         hostname: "{{ NOVA_CONDUCTOR_HOSTNAME }}"
@@ -506,7 +507,7 @@
           NOVA_NOTIFICATIONS: "{{ ENABLE_NOVA_NOTIFICATIONS }}"
 
     - name: Start Nova API container
-      docker:
+      docker_container:
         image: os-nova-api
         name: "{{ NOVA_API_HOSTNAME }}"
         hostname: "{{ NOVA_API_HOSTNAME }}"
@@ -548,7 +549,7 @@
         state: started
 
     - name: Start Nova Scheduler container
-      docker:
+      docker_container:
         image: os-nova-scheduler
         name: "{{ NOVA_SCHEDULER_HOSTNAME }}"
         hostname: "{{ NOVA_SCHEDULER_HOSTNAME }}"
@@ -569,7 +570,7 @@
           NOVA_NOTIFICATIONS: "{{ ENABLE_NOVA_NOTIFICATIONS }}"
 
     - name: Start Nova Compute container
-      docker:
+      docker_container:
         image: os-nova-compute
         name: "{{ NOVA_COMPUTE_HOSTNAME }}"
         hostname: "{{ NOVA_COMPUTE_HOSTNAME }}"
@@ -608,7 +609,7 @@
           NEUTRON_RABBITMQ_PASS: "{{ NEUTRON_RABBITMQ_PASS }}"
 
     - name: Creating Swift rings data container
-      docker:
+      docker_container:
         name: "{{ SWIFT_RINGS_DATA_CONTAINER_NAME }}"
         image: os-base-image
         state: present
@@ -617,7 +618,7 @@
           - /etc/swift/rings
 
     - name: Creating Swift storage data container
-      docker:
+      docker_container:
         name: "{{ SWIFT_DEVS_DATA_CONTAINER_NAME }}"
         image: os-base-image
         state: present
@@ -626,7 +627,7 @@
           - /srv/node/dev1
 
     - name: Start Swift Account container
-      docker:
+      docker_container:
         image: os-swift-account
         name: "{{ SWIFT_ACCOUNT_HOSTNAME }}"
         hostname: "{{ SWIFT_ACCOUNT_HOSTNAME }}"
@@ -655,7 +656,7 @@
         swift_account_ip: "{{ swift_account_info.stdout }}"
 
     - name: Start Swift Container container
-      docker:
+      docker_container:
         image: os-swift-container
         name: "{{ SWIFT_CONTAINER_HOSTNAME }}"
         hostname: "{{ SWIFT_CONTAINER_HOSTNAME }}"
@@ -684,7 +685,7 @@
         swift_container_ip: "{{ swift_container_info.stdout }}"
 
     - name: Start Swift Object container
-      docker:
+      docker_container:
         image: os-swift-object
         name: "{{ SWIFT_OBJECT_HOSTNAME }}"
         hostname: "{{ SWIFT_OBJECT_HOSTNAME }}"
@@ -713,7 +714,7 @@
         swift_object_ip: "{{ swift_object_info.stdout }}"
 
     - name: Start Swift Proxy container
-      docker:
+      docker_container:
         image: os-swift-proxy
         name: "{{ SWIFT_PROXY_HOSTNAME }}"
         hostname: "{{ SWIFT_PROXY_HOSTNAME }}"
@@ -743,7 +744,7 @@
         state: started
 
     - name: Start Glance Registry container
-      docker:
+      docker_container:
         image: os-glance-registry
         name: "{{ GLANCE_REGISTRY_HOSTNAME }}"
         hostname: "{{ GLANCE_REGISTRY_HOSTNAME }}"
@@ -768,7 +769,7 @@
         state: started
 
     - name: Start Glance API container
-      docker:
+      docker_container:
         image: os-glance-api
         name: "{{ GLANCE_API_HOSTNAME }}"
         hostname: "{{ GLANCE_API_HOSTNAME }}"

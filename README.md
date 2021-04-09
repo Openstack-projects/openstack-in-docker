@@ -11,13 +11,13 @@ OpenStack services running inside containers. Ironic demo included.
 
 ## Prerequisites
 
- * [Docker](https://www.docker.com) 1.6.0 or later
+ * [Docker](https://www.docker.com)
 
  * [docker-py](https://github.com/docker/docker-py) version 1.2.3 on the ansible server running the playbook
  * [MySQL-python](https://pypi.python.org/pypi/MySQL-python) on the ansible server running the playbook
  * OpenStack python clients for Keystone, Glance, Neutron, Swift, Ironic and Nova on the ansible server running the playbook
 
-        pip install python-{keystone,neutron,ironic,nova,glance,swift,openstack}client docker-py==1.2.3 MySQL-python
+        pip3 install python-{keystone,neutron,ironic,nova,glance,swift,openstack}client docker-py
 
 
 If you are using an Ubuntu box, above requirements require in turn:
